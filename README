@@ -1,0 +1,132 @@
+CSV Records
+==========
+
+This Rails plugin extends ActiveRecord::Base for simple loading and dumping of 
+CSV files.
+
+Installation
+=======
+
+You must specify the base CSV_DIR pathname, either in application.rb, your 
+environment file, or directly in your ActiveRecord::Base instance.
+
+Rails 3:
+
+  rails plugin install git://github.com/wtn/csv_records.git
+
+Rails 2:
+
+	./script/plugin install git://github.com/wtn/csv_records.git
+
+Public Methods
+=======
+
+The csv_exportable module provides the csv_write method, which writes each row 
+in the table to disk. You may specify which columns and rows to export by 
+passing options to the method or overriding defaults with methods in your 
+class. Exporting is quick, as records are loaded as arrays of arrays with 
+ActiveRecord::Base.select_rows, rather than being instantiated as normal 
+ActiveRecord objects. You may use the default scopes and file options or you 
+may pass custom parameters. This method returns the number of rows in the 
+export scope.
+
+The csv_importable module provides the csv_import method, which saves each CSV 
+row as an ActiveRecord object. Callbacks are executed as normal. Each row is 
+loaded with create! inside one transaction for the whole data set. If any row 
+fails, the whole data import will be rolled back. This method returns the 
+number of rows added during the import.
+
+The table_empty module adds table_empty?, which is helpful if you need to 
+check if you've imported data yet (or if any data exists to export). The 
+method returns nil if the klass' table does not exist, true or false 
+otherwise.
+
+Private Methods
+=======
+
+csv_export_column_names may be used with csv_export_excluded_column_names, 
+noncontent_column_names, timestamp_column_names, super(), or other methods you 
+write to control which columns are included when exporting data. The simplest 
+way is to override csv_export_excluded_column_names in your class--it returns 
+an empty array by default.
+
+csv_filepath and csv_filename specify where files get read and written from. 
+CSV_DIR must be set, either globally in your environment file or in your 
+class.
+
+Examples
+=======
+
+Person.csv_import # create active_record rows from people.csv
+
+Person.csv_import(*%w{managers players})
+  # load from managers.csv and players.csv
+
+Stadium.csv_write # dump all rows into stadiums.csv
+
+Bird.table_empty? # check if birds exist (nil if table missing)
+
+zebra_scope = Zebra.where('age > 7')
+Zebra.csv_write(:scope => zebra_scope) # pass a custom scope
+zebra_scope.base_class.write_csv(:scope => zebra_scope) # same
+
+Bug.csv_write(:filename => 'banana_slugs', :scope => Bug.banana_slugs)
+  # write rows in the banana_slugs scope to 'banana_slugs.csv'
+
+Book.csv_write(:filepath => '/home/wtn/books.csv')
+  # specify output filepath (overrides any passed filename)
+
+def Tree.csv_export_excluded_column_names; noncontent_column_names; end
+  # avoid writing primary key and foreign keys to CSV
+
+Box::CSV_DIR = Rails.root.join('csv', 'paper_products')
+  # Override CSV_DIR
+
+ActiveRecord::Base.csv_write(:scope => Toy.blue)
+  # fails because ActiveRecord::Base.table_name raises exception
+
+Pencil.csv_write(:column_names => %w{name hardness})
+  # export only specified columns
+
+Caveats
+=======
+
+The modules in this plugin extend ActiveRecord::Base. If this annoys you, you 
+may instead extend only the classes you need. You may also remove unneeded 
+methods.
+
+If you do not need the time-consuming ActiveRecord callbacks that run with 
+create!, submit a patch or use fixtures instead.
+
+Imports run in a database transaction, so you get all or none of your records.
+
+Instead of using batches, the csv_write method performs one large query on the 
+passed scope. While ActiveRecord objects are not instantiated for each row, I 
+will implement scope pagination in the next version for cases with many rows 
+(or extra chunky rows).
+
+Remember to a background queue and database constraints in production Rails 
+environments.
+
+Future Releases
+=======
+
+Methods like csv_export_column_names can be useful when restricting read 
+access for certain columns, like attr_readonly. Example: using ActiveResource 
+with a permissions system.
+
+This functionality can be generalized to other types of data serialization 
+(Yaml, XML, JSON, HTML, Marshall).
+
+During CSV import, specifying columns to exclude or specifying create instead 
+of create! might be useful.
+
+Basic tests for sqlite3 will be added.
+
+Suggestions and patches are invited.
+
+License
+=======
+
+Copyright (c) 2010 William T Nelson, released under the Simplified BSD 
+License. See the BSD-LICENSE file.
