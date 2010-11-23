@@ -16,7 +16,7 @@ Rails 3:
 
 Rails 2:
 
-	./script/plugin install git://github.com/wtn/csv_records.git
+	script/plugin install git://github.com/wtn/csv_records.git
 
 Public Methods
 =======
@@ -50,9 +50,10 @@ write to control which columns are included when exporting data. The simplest
 way is to override csv_export_excluded_column_names in your class--it returns 
 an empty array by default.
 
-csv_filepath and csv_filename specify where files get read and written from. 
-CSV_DIR must be set, either globally in your environment file or in your 
-class.
+csv_filepath, csv_dir and csv_filename determine filepath generation. csv_dir 
+depends on the CSV_DIR constant, which may be set in your class or globally in 
+your environment file. Alternately, you may pass the :filepath option and 
+avoid using these methods altogether.
 
 Examples
 =======
@@ -91,6 +92,8 @@ Pencil.csv_write(:column_names => %w{name hardness})
 Caveats
 =======
 
+CSVRecords has been tested with ActiveRecord 3 on ruby 1.8.7 and 1.9.2-p0.
+
 The modules in this plugin extend ActiveRecord::Base. If this annoys you, you 
 may instead extend only the classes you need. You may also remove unneeded 
 methods.
@@ -104,26 +107,6 @@ Instead of using batches, the csv_write method performs one large query on the
 passed scope. While ActiveRecord objects are not instantiated for each row, I 
 will implement scope pagination in the next version for cases with many rows 
 (or extra chunky rows).
-
-Remember to a background queue and database constraints in production Rails 
-environments.
-
-Future Releases
-=======
-
-Methods like csv_export_column_names can be useful when restricting read 
-access for certain columns, like attr_readonly. Example: using ActiveResource 
-with a permissions system.
-
-This functionality can be generalized to other types of data serialization 
-(Yaml, XML, JSON, HTML, Marshall).
-
-During CSV import, specifying columns to exclude or specifying create instead 
-of create! might be useful.
-
-Basic tests for sqlite3 will be added.
-
-Suggestions and patches are invited.
 
 License
 =======

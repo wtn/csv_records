@@ -6,10 +6,11 @@ if CSV.const_defined? :Reader
   CSV = FasterCSV
 end
 
-require 'csv_records/csv_exportable'
-require 'csv_records/csv_importable'
-require 'csv_records/table_empty'
-require 'csv_records/shared_file_methods'
+require File.dirname(__FILE__) << '/lib/csv_records.rb'
+require File.dirname(__FILE__) << '/lib/csv_records/csv_exportable.rb'
+require File.dirname(__FILE__) << '/lib/csv_records/csv_importable.rb'
+require File.dirname(__FILE__) << '/lib/csv_records/table_empty.rb'
+require File.dirname(__FILE__) << '/lib/csv_records/shared_file_methods.rb'
 
 modules = [
   CSVRecords::CSVExportable,
@@ -19,9 +20,5 @@ modules = [
 ]
 
 ActiveRecord::Base.class_eval do
-  modules.each {|m| extend m }
-
-  def self.csv_dir
-    const_get(:'CSV_DIR') or fail 'You must specify a base CSV directory.'
-  end
+  extend *modules
 end

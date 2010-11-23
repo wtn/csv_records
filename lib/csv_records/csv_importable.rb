@@ -10,7 +10,6 @@ module CSVRecords::CSVImportable
   private
 
   def csv_records_create(filepath)
-    puts "loading records from #{filepath}..."
     CSV.foreach(filepath, :headers => true) do |row|
       create!(row.to_hash)
     end

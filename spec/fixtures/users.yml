@@ -1,0 +1,13 @@
+--- 
+  - :name: Buster
+    :salary: 65536
+    :kind: catcher
+  - :name: Tim
+    :salary: 131072
+    :kind: starter
+  - :name: Darren
+    :salary: 32768
+    :kind: runner
+  - :name: Brian
+    :salary: 131072
+    :kind: closer
