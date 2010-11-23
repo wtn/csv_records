@@ -1,6 +1,10 @@
-# Include hook code here
+require 'csv'
 
-RUBY_VERSION < '1.9' ? (require 'fastercsv') : (require 'csv')
+if CSV.const_defined? :Reader
+  require 'fastercsv'
+  Object.send(:remove_const, :CSV)
+  CSV = FasterCSV
+end
 
 require 'csv_records/csv_exportable'
 require 'csv_records/csv_importable'
